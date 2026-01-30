@@ -21,19 +21,21 @@ jobs:
         with:
           node-version: '24.x'
 
-      # ✅ If your Node.js project is in a subfolder like "backend", add `working-directory: backend`
+      # ✅ Install dependencies, build, and test
+      # If your Node.js app is in a subfolder, uncomment working-directory
       - name: Install dependencies, build, and test
         run: |
           npm install
           npm run build --if-present
           npm run test --if-present
-        # working-directory: backend  # Uncomment if your project is in a subfolder
+        # working-directory: backend  # Uncomment if app is in a subfolder
 
+      # ✅ Upload only the folder containing package.json
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .  # or path: backend if using a subfolder
+          path: .  # Change to ./backend if your app is in a subfolder
 
   deploy:
     runs-on: ubuntu-latest
@@ -48,6 +50,10 @@ jobs:
         with:
           name: node-app
 
+      # ✅ Debug: list files to ensure correct folder
+      - name: List files
+        run: ls -R
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -55,12 +61,12 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_67DE3BB026D143A9B3E94110967DB269 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_05191109AF8142FC96C00922B5284FBF }}
 
+      # ✅ Deploy to Azure Web App
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'simpletolearndeployment'
-          # ✅ Remove slot-name if deploying to default Production slot, or keep it as 'production'
-          package: ./node-app   # The folder downloaded from artifact
+          package: ./node-app   # Folder that contains package.json after download
         env:
-          ENABLE_DEBUG_LOGGING: true  # ✅ Optional: see detailed deployment logs
+          ENABLE_DEBUG_LOGGING: true  # Optional: see detailed deployment logs
