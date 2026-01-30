@@ -16,15 +16,20 @@ app.get("/api/messages", (req, res) => {
 });
 
 app.post("/api/messages", (req, res) => {
+  console.log("POST HIT", req.body);
   const { text } = req.body;
+
   if (!text) return res.status(400).json({ error: "Text required" });
 
   const msg = { id: Date.now(), text };
   messages.push(msg);
+
   res.status(201).json(msg);
 });
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
 });
+
