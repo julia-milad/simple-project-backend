@@ -21,21 +21,19 @@ jobs:
         with:
           node-version: '24.x'
 
-      # ✅ Install dependencies, build, and test
-      # If your Node.js app is in a subfolder, uncomment working-directory
+      # Install dependencies, build, and test
       - name: Install dependencies, build, and test
         run: |
           npm install
           npm run build --if-present
           npm run test --if-present
-        # working-directory: backend  # Uncomment if app is in a subfolder
 
-      # ✅ Upload only the folder containing package.json
+      # Upload the entire repository (root) as artifact
       - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .  # Change to ./backend if your app is in a subfolder
+          path: .   # root of repo, contains package.json
 
   deploy:
     runs-on: ubuntu-latest
@@ -50,8 +48,8 @@ jobs:
         with:
           name: node-app
 
-      # ✅ Debug: list files to ensure correct folder
-      - name: List files
+      # Debug: list files to ensure package.json is present
+      - name: List files after artifact download
         run: ls -R
 
       - name: Login to Azure
@@ -61,12 +59,11 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_67DE3BB026D143A9B3E94110967DB269 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_05191109AF8142FC96C00922B5284FBF }}
 
-      # ✅ Deploy to Azure Web App
+      # Deploy to Azure Web App
       - name: Deploy to Azure Web App
-        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'simpletolearndeployment'
-          package: ./node-app   # Folder that contains package.json after download
+          package: .   # root folder of repo (contains package.json)
         env:
-          ENABLE_DEBUG_LOGGING: true  # Optional: see detailed deployment logs
+          ENABLE_DEBUG_LOGGING: true  # optional: shows detailed deployment logs
